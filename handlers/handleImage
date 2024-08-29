@@ -1,0 +1,43 @@
+<?php
+    if (isset($_POST['submit'])) {
+        $img = $_FILES["file"]["name"];
+        $imgTemp =$_FILES["file"]['tmp_name'];
+        $ext = strtolower(pathinfo($img,PATHINFO_EXTENSION));
+        $name = $_POST["name"];
+       
+        $errors = [];
+        $imgExt = ['png','jpg','jpeg'];
+        if ($_FILES['file']['error']!= 0) {
+            $errors[] ='your image has problem';
+        }elseif ($_FILES['file']['size']/(1024*1024) > 5 ) {
+            $errors[]='your image too large max 5MB';
+        }elseif (!in_array($ext,$imgExt)) {
+            $errors[]=' you must upload image';
+        }
+        if (is_numeric($name)) {
+            $errors[]='image name must be text';
+        }elseif ($name == '') {
+            $name=uniqid();
+        }
+        $newName = $name.".".$ext ;
+        if (empty($errors)) {
+            $imgDir ="images/";
+            $imgList =scandir($imgDir);
+           $uploaded= move_uploaded_file($imgTemp,"images/$newName");
+            echo "your image ".$newName." has been uploaded <br>";
+            for ($i=2; $i < count($imgList) ; $i++) { 
+                echo "<a href='$imgDir$imgList[$i]' download><img src='$imgDir$imgList[$i]'style='width:100px; height:100px;margin:10px' /></a>";
+               
+            }
+            echo "<br>click on any photo to download";
+        }else {
+            foreach ($errors as $key => $value) {
+                echo $value.'<br>';
+            }
+        }
+       
+    }else {
+        header('location:img.php');
+    }
+
+     
